@@ -38,15 +38,12 @@ export const deleteUsuario = async(id: string) =>{
 };
 
 //metodo de autencação de usuário (login) a senha é comparada
-export const autenticaUsuario = async(email:string, senha: string)=>{
-    await connectMongo();
-    //buscar o usuário pelo email 
-    const usuario = await Usuario.find({email}).select("+senha");
-    //se caso usuario nao encontrado
-    if (!usuario || usuario.length ==0) return null;
-    //se caso usuario for encontrado
-    const senhaSecreta = await usuario[0].compareSenha(senha); //booleana
-    if (!senhaSecreta) return null; //senha incorreta
-    //se deu certa retorna usuario
-    return usuario[0];
+export async function autenticaUsuario(email: string, senha: string) {
+  const usuario = await Usuario.findOne({ email });
+  if (!usuario) return null;
+
+  const senhaValida = await usuario.compareSenha(senha);
+  if (!senhaValida) return null;
+
+  return usuario;
 }

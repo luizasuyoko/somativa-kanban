@@ -1,25 +1,41 @@
 //rotas de requisições api que não usa id
 
-import { createTarefa, getAllTarefas } from "@/controllers/TarefaController";
 import { NextRequest, NextResponse } from "next/server";
+import mongoose from "mongoose";
+import Tarefa from "@/models/Tarefa";
 
-export async function GET() {
-    try{
-        //requisição http -> front -> request -> backend
-        const tarefas = await getAllTarefas(); //busca todos os usuarios no bd
-        return NextResponse.json({success:true, data: tarefas});
-    } catch (error){
-        return NextResponse.json({success: false, error:error})
-    }
+const MONGO_URI = process.env.MONGO_URI;
+
+export async function GET(req: NextRequest) {
+  try {
+    if (!MONGO_URI) throw new Error("MONGO_URI not defined");
+
+    await mongoose.connect(MONGO_URI);
+
+    const tarefa = await Tarefa.find().sort({ criadoEm: -1 });
+
+    return NextResponse.json({ success: true, tarefa });
+  } catch (error: any) {
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  }
 }
 
-export async function POST(req:NextRequest) { //pega o conteudo do html 
-    try {
-        const data = await req.json(); //converter o html em json 
-        const novoTarefa = await createTarefa(data);
-        return NextResponse.json({success:true, data:novoTarefa});
-    } catch (error) {
-        
+export async function POST(req: NextRequest) {
+  try {
+    if (!MONGO_URI) throw new Error("MONGO_URI not defined");
+    await mongoose.connect(MONGO_URI);
+
+    const { titulo, descricao, criadoPor, criadoPorNome } = await req.json();
+
+    if (!titulo || !descricao || !criadoPor || !criadoPorNome) {
+      return NextResponse.json({ success: false, error: "Todos os campos são obrigatórios" }, { status: 400 });
     }
-    
+
+    const tarefa = new Tarefa({ titulo, descricao, criadoPor, criadoPorNome });
+    await tarefa.save();
+
+    return NextResponse.json({ success: true, tarefa });
+  } catch (error: any) {
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  }
 }

@@ -1,63 +1,65 @@
 "use client";
+
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
- //componente client-side
+export default function Login() {
+  const [email, setEmail] = useState("");
+  const [senha, setSenha] = useState("");
+  const [erro, setErro] = useState("");
+  const router = useRouter();
 
-export default function Login(){
-    //campo para digitação do email
-    const [email, setEmail] = useState("");
-    //campo para digitação da senha
-    const [senha, setSenha] = useState("");
-    //campo mssg erro 
-    const [erro, setErro] = useState("");
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErro("");
 
-    //controle das rotas de navegação
-    const route = useRouter();
+    try {
+      const resposta = await fetch("/api/usuarios/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, senha }),
+      });
 
-    //método pra enviar o login 
-  const handleSubmit = async( e: React.FormEvent)=>{ //controle dos eventos do Formulário
-        e.preventDefault(); //evita o recarreamento da pagina
-        setErro(""); //limpa a mensagem de erro
+      const data = await resposta.json();
 
-        try {
-            const resposta = await fetch(
-                "api/usuarios/login",{
-                    method: "POST",
-                    headers: {"Content-Type":"application/json"},
-                    body: JSON.stringify({email, senha})
-                }
-            );
-            //analisar a resposta da solicitação
-            const data = await resposta.json()
-            if (data.success){
-                //armazenar as informações do usuario logado no localStorage
-                localStorage.setItem("token", data.token);
-                localStorage.setItem("funcao", data.usuario.funcao);
-                route.push("/dashboard");
-            } else {
-                const erroData = data.error();
-                setErro(erroData.message || "Falha de Login");
-            }
-        } catch (error) {
-            console.error("Erro de Login", error);
-            setErro("Erro de Servidor: " +error);
-        }
+      if (data.success) {
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("funcao", data.usuario.funcao);
+        router.push("/dashboard");
+      } else {
+        setErro(data?.error || data?.message || "Falha de Login");
+      }
+    } catch (error) {
+      console.error("Erro de Login:", error);
+      setErro("Erro de servidor. Tente novamente.");
     }
-  
+  };
 
-    //ReactDom
-    return(
-    <div>
-      <h1>Login</h1>
-      {erro && <p>{erro}</p>}
+  return (
+    <div className="center">
+      <h2>Login</h2>
+      {erro && <p style={{ color: "red" }}>{erro}</p>}
       <form onSubmit={handleSubmit}>
-        <label>Email:</label>
-        <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-        <label>Senha:</label>
-        <input type="senha" value={senha} onChange={(e) => setSenha(e.target.value)} />
+        <div>
+          <label>Email</label>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <label>Senha</label>
+          <input
+            type="password"
+            value={senha}
+            onChange={(e) => setSenha(e.target.value)}
+            required
+          />
+        </div>
         <button type="submit">Entrar</button>
       </form>
     </div>
-  )
+  );
 }

@@ -28,6 +28,17 @@ const UsuarioSchema: Schema<IUsuario> = new Schema({
     },
 })
 
+UsuarioSchema.pre<IUsuario>("save", async function (next) {
+  if (!this.isModified("senha") || !this.senha) return next();
+  try {
+    const salt = await bcrypt.genSalt(10);
+    this.senha = await bcrypt.hash(this.senha, salt);
+    next();
+  } catch (error: any) {
+    next(error);
+  }
+});
+
 //criptografar
 //método para criptografar a senha antes de enviar para o bd
 UsuarioSchema.pre<IUsuario>("save", async function (next) {
