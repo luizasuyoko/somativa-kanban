@@ -29,8 +29,6 @@ export default function DashboardPage(){
             return <DashboardAdmin />;
         }else if (userFuncao === "gestor"){
             return <DashboardGestor />;
-        }else if(userFuncao === "tecnico"){
-            return <DashboardTecnico/>;
         }
     }
 

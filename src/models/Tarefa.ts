@@ -20,6 +20,6 @@ const TarefaSchema: Schema<ITarefa> = new Schema({
     },
 })
 
-const Tarefa: Model<ITarefa> = mongoose.models.Usuario || mongoose.model<ITarefa>("Tarefa", TarefaSchema);
+const Tarefa: Model<ITarefa> = mongoose.models.Tarefa || mongoose.model<ITarefa>("Tarefa", TarefaSchema);
 
 export default Tarefa;

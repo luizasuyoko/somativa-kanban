@@ -1,36 +1,118 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Gerenciador de Tarefas para Times (Estilo Kanban)
 
-## Getting Started
+## Escopo 
 
-First, run the development server:
+- ## Público-Alvo:
+    - Gerente de Projeto
+    - Membro da Equipe
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## Diagramas 
+
+1. ### Diagrama de Classes 
+    - Usuários;
+        - atributos: id, nome, email, senha, função
+        - métodos: create, read, update, delete, login, logout
+    - Tarefas;
+        - atributos: id, titulo, descricao, projetoAss, membroAtrib, status
+        - métodos: create, read, update, delete
+    - Projetos
+        - atributos: id, titulo, descricao
+
+```mermaid
+
+classDiagram 
+    class User {
+        +String id
+        +String nome 
+        +String email
+        +String senha
+        +String funcao
+        +login()
+        +logout()
+        +create()
+        +read()
+        +update()
+        +delete()
+    }
+
+    class Tarefa {
+        +String id
+        +String nome 
+        +String descricao
+        +String projetoAss
+        +String membroAtrib
+        +String status
+        +create()
+        +read()
+        +update()
+        +delete()
+    }
+
+    class Projeto {
+        +String id
+        +String titulo
+        +String descricao
+        +create()
+        +read()
+        +update()
+        +delete()
+    }
+
+    User "1" -- "1+" Tarefa : "responsavel por"
+    Projeto "1" -- "1+" Tarefa : "associado a" 
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. ### Diagrama de Caso de Uso
+- Atores : Gerente, Membros
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- Casos de Uso: 
+    - Gerente: Cria projetos, adiciona tarefas e as atribui aos membros da equipe.
+    - Membro: Vê as tarefas atribuídas a si e pode mover suas tarefas entre os status.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+    Fazer Login -> Antes de Qualquer Ação
 
-## Learn More
+```mermaid 
+graph TD
+subgraph "KANBAN"
+    caso1([Fazer Login])
+    caso2([Gerenciar Tarefas - CRUD])
+    caso3([Acessar o Dashboard])
+    end
 
-To learn more about Next.js, take a look at the following resources:
+    Membro([Membro da Equipe])
+    Gestor([Gerente de Manutenção])
+    
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+    Gestor --> caso1
+    Gestor --> caso3
+    Gestor --> caso2
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+    Membro --> caso1
+    Membro --> caso3
 
-## Deploy on Vercel
+    caso2 --> caso1
+    caso3 --> caso1
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+3. ### Diagrama de Fluxo 
+Detalhar o passo a passo que um usuário segue para se autenticar no sistema e acessar o dashboard
+#### Explicação: 
+- O Fluxo começa quando o usuário acessa a tela de login 
+- Insere as credenciais(email e senha)
+- O sistema verifica se as credenciais são válidas 
+    - se sim: gera um JWT (token) => dashboard
+    - se não: mensagem de erro usuário permanece na tela de login
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```mermaid 
+graph TD 
+    A[Início] --> B[Acessa a Tela de Login]
+    B --> C[Preencher Email e Senha]
+    C --> D{Valida as Credenciais}
+    D --> Sim --> E[Gera um Token JWT]
+    E --> F[Dashboard]
+    D --> Não --> K[Mensagem de Erro]
+    K --> B
+```
+
+## Protótipos 
+ Figma : https://www.figma.com/design/m0pyffP1MY39V8s50ys4tr/Untitled?node-id=0-1&p=f&t=fMyat4fBL30JDIfo-0
